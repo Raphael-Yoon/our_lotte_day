@@ -1,0 +1,174 @@
+@import url('https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&display=swap');
+
+body {
+  background-color: #f0f8ff; /* AliceBlue */
+  font-family: 'Gaegu', cursive;
+  font-weight: 700;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+  padding-top: 2rem;
+}
+
+.container {
+  width: 100%;
+  max-width: 600px;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 15px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+h1, h2 {
+  color: #ff8c69; /* Coral */
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.team-name-input {
+    border: 2px dashed #ff8c69;
+    font-size: 1.2rem;
+    font-weight: 700;
+    text-align: center;
+}
+
+.team-name-input:focus {
+    border-color: #ff6347; /* Tomato */
+    box-shadow: 0 0 0 0.2rem rgba(255, 99, 71, 0.25);
+}
+
+.progress-container {
+  margin-bottom: 2rem;
+}
+
+.progress {
+    height: 20px;
+    border-radius: 10px;
+}
+
+.progress-bar {
+  background-color: #ffb6c1; /* LightPink */
+  border-radius: 10px;
+}
+
+.list-group-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  border-radius: 8px !important; /* Bootstrap override */
+  border: 1px solid #ffe4e1; /* MistyRose */
+  font-size: 1.2rem;
+  padding: 0.75rem 1.25rem;
+}
+
+.list-group-item.completed span {
+  text-decoration: line-through;
+  color: #aaa;
+}
+
+.list-group-item .todo-text {
+    cursor: pointer;
+    flex-grow: 1;
+    margin: 0 10px;
+}
+
+.drag-handle {
+    cursor: grab;
+    color: #ccc;
+}
+
+.list-group-item.dragging {
+    opacity: 0.5;
+}
+
+.right-container {
+    display: flex;
+    align-items: center;
+}
+
+.list-group-item input[type="checkbox"] {
+  margin-right: 15px;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}
+
+.input-group .form-control {
+    border-color: #ffc0cb; /* Pink */
+}
+
+.input-group .form-control:focus {
+    border-color: #ff69b4; /* HotPink */
+    box-shadow: 0 0 0 0.2rem rgba(255, 105, 180, 0.25);
+}
+
+.btn-primary {
+  background-color: #ff69b4; /* HotPink */
+  border-color: #ff69b4;
+}
+
+.btn-primary:hover {
+  background-color: #ff1493; /* DeepPink */
+  border-color: #ff1493;
+}
+
+.btn-danger {
+  background-color: #db7093; /* PaleVioletRed */
+  border-color: #db7093;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  line-height: 1;
+  font-size: 1rem;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.btn-danger:hover {
+  background-color: #c71585; /* MediumVioletRed */
+  border-color: #c71585;
+}
+
+.add-item-form {
+    margin-bottom: 2rem;
+}
+
+.recommendations {
+    border-top: 2px dashed #ffc0cb;
+    padding-top: 1.5rem;
+}
+
+.recommendations .btn {
+    background-color: #add8e6; /* LightBlue */
+    border: none;
+    color: #333;
+    font-weight: 700;
+}
+
+.recommendations .btn:hover {
+    background-color: #87ceeb; /* SkyBlue */
+}
+
+#ranking-section {
+    background-color: #fff8e1; /* Light Yellow */
+    padding: 1.5rem;
+    border-radius: 10px;
+    border: 2px dashed #ffc107; /* Amber */
+}
+
+#ranking-board {
+    border-top: 2px dashed #ffc0cb;
+    padding-top: 1.5rem;
+}
+
+.btn-success {
+    background-color: #28a745; /* Green */
+    border-color: #28a745;
+}
+
+.btn-success:hover {
+    background-color: #218838;
+    border-color: #1e7e34;
+}
