@@ -195,7 +195,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const totalCount = todos.length;
         const percentage = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
 
-        progressText.textContent = `달성률: ${Math.round(percentage)}%`;
+        progressText.textContent = `달성률: ${Math.round(percentage)}% (${completedCount}/${totalCount})`;
         progressBar.style.width = `${percentage}%`;
         progressBar.setAttribute('aria-valuenow', percentage);
 
