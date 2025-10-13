@@ -291,30 +291,55 @@ document.addEventListener('DOMContentLoaded', () => {
         if (uploadBtn) uploadBtn.style.display = 'none';
         rightContainer.prepend(spinner);
         
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            const imageUrl = e.target.result;
-            database.ref(`/our-lotte-day/todos/${currentTodoId}/imageUrl`).set(imageUrl)
-                .then(() => {
-                    // 성공 시: Firebase 리스너가 renderTodos()를 호출하여 자동으로 UI가 갱신됩니다.
-                    currentTodoId = null;
-                })
-                .catch(error => {
-                    alert('데이터베이스에 사진을 저장하지 못했습니다: ' + error.message);
-                    // 4. 실패 시 스피너를 제거하고 버튼을 다시 보여줍니다.
-                    if (uploadBtn) uploadBtn.style.display = 'inline-block';
-                    spinner.remove();
-                    currentTodoId = null;
-                });
+        // --- 이미지 리사이징 로직 시작 ---
+        const MAX_WIDTH = 800; // 이미지 최대 가로 크기
+        const reader = new FileReader(); // 파일을 읽기 위한 FileReader
+
+        reader.onload = (event) => {
+            const img = new Image();
+            img.src = event.target.result;
+
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                let width = img.width;
+                let height = img.height;
+
+                // 가로 크기가 MAX_WIDTH보다 크면 비율에 맞게 줄임
+                if (width > MAX_WIDTH) {
+                    height *= MAX_WIDTH / width;
+                    width = MAX_WIDTH;
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+
+                // canvas의 이미지를 JPEG 데이터 URL로 변환 (품질 70%)
+                const resizedImageUrl = canvas.toDataURL('image/jpeg', 0.7);
+
+                // 리사이징된 이미지를 Firebase에 업로드
+                database.ref(`/our-lotte-day/todos/${currentTodoId}/imageUrl`).set(resizedImageUrl)
+                    .then(() => {
+                        currentTodoId = null; // 성공 시 ID 초기화
+                    })
+                    .catch(error => {
+                        alert('데이터베이스에 사진을 저장하지 못했습니다: ' + error.message);
+                        if (uploadBtn) uploadBtn.style.display = 'inline-block';
+                        spinner.remove();
+                        currentTodoId = null;
+                    });
+            };
         };
-        reader.onerror = (error) => {
+
+        reader.onerror = (error) => { // 파일 읽기 실패 시
             console.error("Error reading file:", error);
             alert("파일을 읽는 중 오류가 발생했습니다.");
-            // 4. 실패 시 스피너를 제거하고 버튼을 다시 보여줍니다.
             if (uploadBtn) uploadBtn.style.display = 'inline-block';
             spinner.remove();
             currentTodoId = null;
         };
+
         reader.readAsDataURL(file);
     };
 
