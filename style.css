@@ -31,7 +31,7 @@ body {
   padding: 20px;
   /* background-color: #fff; */ /* 기존 흰색 배경 대신 이미지 적용 */
   background-image: url('https://www.transparenttextures.com/patterns/light-paper-fibers.png');
-  background-color: rgba(255, 255, 255, 0.95); /* 불투명도를 90% -> 95%로 높여서 글씨를 더 선명하게 */
+  background-color: rgba(255, 255, 255, 0.7); /* 투명도를 70%로 더 낮춰 배경이 더 잘 보이게 합니다. */
   background-blend-mode: screen; /* 배경색과 이미지를 자연스럽게 혼합 */
 
   border-radius: 15px;
