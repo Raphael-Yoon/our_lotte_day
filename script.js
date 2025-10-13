@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     const teamNameInput = document.getElementById('team-name');
     const newItemInput = document.getElementById('new-item');
     const addItemForm = document.getElementById('add-item-form');
@@ -24,44 +24,55 @@ document.addEventListener('DOMContentLoaded', () => {
     ];
     const allRecommendations = [...attractionRecommendations, ...foodRecommendations, ...showRecommendations];
 
-    let todos = [];
-
     // --- Firebase Setup ---
     const firebaseConfig = {
         databaseURL: "https://ourlotteday-default-rtdb.asia-southeast1.firebasedatabase.app",
     };
-    firebase.initializeApp(firebaseConfig);
+    // Initialize Firebase only if it hasn't been initialized yet
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
     const database = firebase.database();
-    const dbRef = database.ref('/our-lotte-day');
+    const DB_PATH = '/our-lotte-day';
+    const dbRef = database.ref(DB_PATH);
+    const todosRef = dbRef.child('todos');
 
+    let todos = [];
     let currentTodoId = null;
     const photoUploadInput = document.getElementById('photo-upload');
 
-    // --- Data Persistence ---
-    dbRef.on('value', (snapshot) => {
+    const handleDataSnapshot = (snapshot) => {
         const data = snapshot.val();
         if (data) {
             teamNameInput.value = data.teamName || '✨ 우리들의 신나는 모험 ✨';
-            
+
             if (data.todos) {
                 todos = Object.keys(data.todos).map(key => ({
                     id: key,
                     ...data.todos[key]
                 })).sort((a, b) => a.order - b.order);
             } else {
+                // If todos don't exist, but other data does, initialize todos
                 todos = [];
+                initializeDefaultTodos();
             }
-
         } else {
             // If no data, initialize with defaults
-            dbRef.child('teamName').set('✨ 우리들의 신나는 모험 ✨');
-            const todosRef = dbRef.child('todos');
-            allRecommendations.forEach((rec, index) => {
-                todosRef.push({ text: rec.text, completed: false, order: index });
-            });
+            initializeDefaultData();
         }
         renderTodos();
-    });
+    };
+
+    const initializeDefaultTodos = () => {
+        allRecommendations.forEach((rec, index) => {
+            todosRef.push({ text: rec.text, completed: false, order: index });
+        });
+    };
+
+    const initializeDefaultData = () => {
+        dbRef.child('teamName').set('✨ 우리들의 신나는 모험 ✨');
+        initializeDefaultTodos();
+    };
 
     const updateTeamName = (name) => {
         dbRef.child('teamName').set(name);
@@ -77,7 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
             todoList.appendChild(emptyMsg);
             return;
         }
-        
+
         todos.forEach(todo => {
             const li = document.createElement('li');
             li.className = `list-group-item ${todo.completed ? 'completed' : ''}`;
@@ -104,7 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
             deleteBtn.className = 'btn btn-danger btn-sm';
             deleteBtn.textContent = 'X';
             deleteBtn.addEventListener('click', () => deleteTodo(todo.id));
-            
+
             if (todo.completed) {
                 if (todo.imageUrl) {
                     // 이미지가 있을 경우: 교체 및 삭제 버튼
@@ -172,7 +183,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function onDrag(e) {
         if (!isDragging) return;
         e.preventDefault();
-        
+
         const y = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
         const afterElement = getDragAfterElement(todoList, y);
 
@@ -226,7 +237,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const updates = {};
         todos.forEach(todo => {
             if(todo.id) {
-                updates[`/our-lotte-day/todos/${todo.id}/order`] = todo.order;
+                updates[`${DB_PATH}/todos/${todo.id}/order`] = todo.order;
             }
         });
         if (Object.keys(updates).length > 0) {
@@ -251,23 +262,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const addTodo = (text) => {
         if (text.trim() === '') return;
         const newTodo = { text: text.trim(), completed: false, order: todos.length };
-        database.ref('/our-lotte-day/todos').push(newTodo);
+        todosRef.push(newTodo);
     };
 
     const toggleTodo = (id) => {
         const todo = todos.find(t => t.id == id);
         if (todo) {
-            database.ref(`/our-lotte-day/todos/${id}/completed`).set(!todo.completed);
+            todosRef.child(`${id}/completed`).set(!todo.completed);
         }
     };
 
     const deleteTodo = (id) => {
-        database.ref(`/our-lotte-day/todos/${id}`).remove();
+        todosRef.child(id).remove();
     };
 
     const deletePhoto = (id) => {
         if (confirm('정말로 사진을 삭제하시겠습니까?')) {
-            database.ref(`/our-lotte-day/todos/${id}/imageUrl`).remove();
+            todosRef.child(`${id}/imageUrl`).remove();
         }
     };
 
@@ -290,7 +301,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // 3. 기존 버튼을 숨기고 스피너를 표시합니다.
         if (uploadBtn) uploadBtn.style.display = 'none';
         rightContainer.prepend(spinner);
-        
+
         // --- 이미지 리사이징 로직 시작 ---
         const MAX_WIDTH = 800; // 이미지 최대 가로 크기
         const reader = new FileReader(); // 파일을 읽기 위한 FileReader
@@ -319,7 +330,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const resizedImageUrl = canvas.toDataURL('image/jpeg', 0.7);
 
                 // 리사이징된 이미지를 Firebase에 업로드
-                database.ref(`/our-lotte-day/todos/${currentTodoId}/imageUrl`).set(resizedImageUrl)
+                todosRef.child(`${currentTodoId}/imageUrl`).set(resizedImageUrl)
                     .then(() => {
                         currentTodoId = null; // 성공 시 ID 초기화
                     })
@@ -371,4 +382,7 @@ document.addEventListener('DOMContentLoaded', () => {
         btn.onclick = () => addTodo(rec.text);
         recommendationsContainer.appendChild(btn);
     });
+
+    // --- Data Persistence Listener ---
+    dbRef.on('value', handleDataSnapshot);
 });

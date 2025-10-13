@@ -1,45 +1,30 @@
 @import url('https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&display=swap');
 
 body {
-  /* 모바일용 배경 이미지를 기본으로 설정합니다. */
-  background-image: url('images/background-mobile.jpg');
-  background-color: #f0f8ff; /* 이미지가 로딩되지 않을 때를 위한 배경색 */
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
-  background-repeat: no-repeat;
- 
+  background-color: #fff0f5; /* LavenderBlush: 부드러운 핑크빛 파스텔톤 */
   font-family: 'Gaegu', cursive;
   font-weight: 700;
   display: flex;
   justify-content: center;
   align-items: flex-start;
   min-height: 100vh;
-  padding-top: 2rem; /* 콘텐츠가 상단에 너무 붙지 않도록 여백 추가 */
-}
-
-/* 화면 너비가 768px 이상일 때 (데스크톱/태블릿) 데스크톱용 이미지로 교체합니다. */
-@media (min-width: 768px) {
-  body {
-    background-image: url('images/background-desktop.jpg'); /* 데스크톱용 이미지 경로 */
-  }
+  padding-top: 2rem;
 }
 
 .container {
   width: 100%;
   max-width: 600px;
   padding: 20px;
-  /* background-color: #fff; */ /* 기존 흰색 배경 대신 이미지 적용 */
   background-image: url('https://www.transparenttextures.com/patterns/light-paper-fibers.png');
-  background-color: rgba(255, 255, 255, 0.7); /* 투명도를 70%로 더 낮춰 배경이 더 잘 보이게 합니다. */
-  background-blend-mode: screen; /* 배경색과 이미지를 자연스럽게 혼합 */
+  background-color: #FFFAF0; /* FloralWhite: 부드러운 아이보리 파스텔톤 */
+  background-blend-mode: overlay; /* 배경색과 이미지를 자연스럽게 혼합 */
 
   border-radius: 15px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 h1, h2 {
-  color: #ff8c69; /* Coral */
+  color: #ff6347; /* Tomato */
   text-align: center;
   margin-bottom: 1.5rem;
 }
@@ -71,12 +56,14 @@ h1, h2 {
 }
 
 .list-group-item {
+  flex-direction: column;
+  align-items: stretch;
   display: flex;
-  align-items: center;
   justify-content: space-between;
   margin-bottom: 10px;
-  border-radius: 8px !important; /* Bootstrap override */
+  border-radius: 8px;
   border: 1px solid #ffe4e1; /* MistyRose */
+  background-color: #FFFAF0; /* FloralWhite: 컨테이너와 동일한 파스텔톤 적용 */
   font-size: 1.2rem;
   padding: 0.75rem 1.25rem;
 }
@@ -177,11 +164,6 @@ h1, h2 {
 .btn-success:hover {
     background-color: #218838;
     border-color: #1e7e34;
-}
-
-.list-group-item {
-    flex-direction: column;
-    align-items: stretch;
 }
 
 .todo-top-row {
