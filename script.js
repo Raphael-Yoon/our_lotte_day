@@ -29,11 +29,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Firebase Setup ---
     const firebaseConfig = {
         databaseURL: "https://ourlotteday-default-rtdb.asia-southeast1.firebasedatabase.app",
-        storageBucket: "ourlotteday.appspot.com"
     };
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
-    const storage = firebase.storage();
     const dbRef = database.ref('/our-lotte-day');
 
     let currentTodoId = null;
@@ -246,32 +244,30 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const deleteTodo = (id) => {
-        // Also delete photo from storage if it exists
-        const todo = todos.find(t => t.id === id);
-        if (todo && todo.imageUrl) {
-            const photoRef = storage.refFromURL(todo.imageUrl);
-            photoRef.delete().catch(error => {
-                console.error("Error deleting photo: ", error);
-            });
-        }
         database.ref(`/our-lotte-day/todos/${id}`).remove();
     };
 
     const uploadPhoto = (file) => {
         if (!currentTodoId || !file) return;
-        const todoId = currentTodoId;
-        const filePath = `images/${todoId}/${file.name}`;
-        const fileRef = storage.ref(filePath);
-
-        fileRef.put(file).then(snapshot => {
-            snapshot.ref.getDownloadURL().then(downloadURL => {
-                database.ref(`/our-lotte-day/todos/${todoId}/imageUrl`).set(downloadURL);
-                currentTodoId = null;
-            });
-        }).catch(error => {
-            console.error("Error uploading photo: ", error);
+        
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const imageUrl = e.target.result;
+            database.ref(`/our-lotte-day/todos/${currentTodoId}/imageUrl`).set(imageUrl)
+                .then(() => {
+                    currentTodoId = null;
+                })
+                .catch(error => {
+                    alert('데이터베이스에 사진을 저장하지 못했습니다: ' + error.message);
+                    currentTodoId = null;
+                });
+        };
+        reader.onerror = (error) => {
+            console.error("Error reading file:", error);
+            alert("파일을 읽는 중 오류가 발생했습니다.");
             currentTodoId = null;
-        });
+        };
+        reader.readAsDataURL(file);
     };
 
     // --- Event Listeners ---
