@@ -273,22 +273,46 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const uploadPhoto = (file) => {
         if (!currentTodoId || !file) return;
+
+        // 1. 로딩 스피너를 표시할 li 요소를 찾습니다.
+        const listItem = document.querySelector(`li[data-id="${currentTodoId}"]`);
+        if (!listItem) return;
+
+        const rightContainer = listItem.querySelector('.right-container');
+        const uploadBtn = rightContainer.querySelector('.upload-btn');
+
+        // 2. 스피너 엘리먼트를 생성합니다.
+        const spinner = document.createElement('div');
+        spinner.className = 'spinner-border spinner-border-sm text-primary me-2'; // me-2로 오른쪽 여백 추가
+        spinner.setAttribute('role', 'status');
+        spinner.innerHTML = `<span class="visually-hidden">Loading...</span>`;
+
+        // 3. 기존 버튼을 숨기고 스피너를 표시합니다.
+        if (uploadBtn) uploadBtn.style.display = 'none';
+        rightContainer.prepend(spinner);
         
         const reader = new FileReader();
         reader.onload = (e) => {
             const imageUrl = e.target.result;
             database.ref(`/our-lotte-day/todos/${currentTodoId}/imageUrl`).set(imageUrl)
                 .then(() => {
+                    // 성공 시: Firebase 리스너가 renderTodos()를 호출하여 자동으로 UI가 갱신됩니다.
                     currentTodoId = null;
                 })
                 .catch(error => {
                     alert('데이터베이스에 사진을 저장하지 못했습니다: ' + error.message);
+                    // 4. 실패 시 스피너를 제거하고 버튼을 다시 보여줍니다.
+                    if (uploadBtn) uploadBtn.style.display = 'inline-block';
+                    spinner.remove();
                     currentTodoId = null;
                 });
         };
         reader.onerror = (error) => {
             console.error("Error reading file:", error);
             alert("파일을 읽는 중 오류가 발생했습니다.");
+            // 4. 실패 시 스피너를 제거하고 버튼을 다시 보여줍니다.
+            if (uploadBtn) uploadBtn.style.display = 'inline-block';
+            spinner.remove();
             currentTodoId = null;
         };
         reader.readAsDataURL(file);
