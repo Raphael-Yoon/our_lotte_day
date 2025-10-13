@@ -61,20 +61,21 @@ h1, h2 {
   display: flex;
   justify-content: space-between;
   margin-bottom: 10px;
-  border-radius: 10px; /* 모서리를 좀 더 둥글게 */
-  border: 1px solid #FFB6C1; /* LightPink: 테두리 색상 변경 */
-  background-color: #F5FFFA; /* MintCream: 부드러운 민트색으로 변경 */
+  border-radius: 10px;
+  border: 1px solid #c3e6cb; /* 녹색 계열 테두리로 변경 */
+  background-color: #dff0d8; /* 화사한 파스텔톤 녹색으로 변경 */
   font-size: 1.2rem;
   padding: 0.75rem 1.25rem;
 }
 
 .list-group-item.completed {
-  background-color: #DCDCDC; /* Gainsboro: 완료 항목 배경색을 더 진하게 */
+  background-color: #F5FFFA; /* MintCream: 부드러운 민트색으로 변경 */
+  border-color: #FFB6C1; /* LightPink: 핑크색 계열 테두리로 변경 */
 }
 
 .list-group-item.completed .todo-text {
   text-decoration: line-through;
-  color: #888; /* 완료 항목 텍스트 색상을 더 진하게 */
+  color: #888; /* 완료된 항목은 회색으로 변경 */
 }
 
 .list-group-item .todo-text {
