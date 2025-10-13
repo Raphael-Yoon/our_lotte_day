@@ -105,15 +105,33 @@ document.addEventListener('DOMContentLoaded', () => {
             deleteBtn.textContent = 'X';
             deleteBtn.addEventListener('click', () => deleteTodo(todo.id));
             
-            if (todo.completed && !todo.imageUrl) {
-                const uploadBtn = document.createElement('button');
-                uploadBtn.className = 'btn btn-sm btn-outline-primary upload-btn';
-                uploadBtn.textContent = '사진 올리기';
-                uploadBtn.onclick = () => {
-                    currentTodoId = todo.id;
-                    photoUploadInput.click();
-                };
-                rightContainer.appendChild(uploadBtn);
+            if (todo.completed) {
+                if (todo.imageUrl) {
+                    // 이미지가 있을 경우: 교체 및 삭제 버튼
+                    const replaceBtn = document.createElement('button');
+                    replaceBtn.className = 'btn btn-sm btn-outline-success upload-btn me-1';
+                    replaceBtn.textContent = '사진 교체';
+                    replaceBtn.onclick = () => {
+                        currentTodoId = todo.id;
+                        photoUploadInput.click();
+                    };
+                    const deletePhotoBtn = document.createElement('button');
+                    deletePhotoBtn.className = 'btn btn-sm btn-outline-danger upload-btn';
+                    deletePhotoBtn.textContent = '사진 삭제';
+                    deletePhotoBtn.onclick = () => deletePhoto(todo.id);
+                    rightContainer.appendChild(replaceBtn);
+                    rightContainer.appendChild(deletePhotoBtn);
+                } else {
+                    // 이미지가 없을 경우: 업로드 버튼
+                    const uploadBtn = document.createElement('button');
+                    uploadBtn.className = 'btn btn-sm btn-outline-primary upload-btn';
+                    uploadBtn.textContent = '사진 올리기';
+                    uploadBtn.onclick = () => {
+                        currentTodoId = todo.id;
+                        photoUploadInput.click();
+                    };
+                    rightContainer.appendChild(uploadBtn);
+                }
             }
 
             rightContainer.appendChild(deleteBtn);
@@ -245,6 +263,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const deleteTodo = (id) => {
         database.ref(`/our-lotte-day/todos/${id}`).remove();
+    };
+
+    const deletePhoto = (id) => {
+        if (confirm('정말로 사진을 삭제하시겠습니까?')) {
+            database.ref(`/our-lotte-day/todos/${id}/imageUrl`).remove();
+        }
     };
 
     const uploadPhoto = (file) => {
