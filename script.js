@@ -29,11 +29,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Firebase Setup ---
     const firebaseConfig = {
         databaseURL: "https://ourlotteday-default-rtdb.asia-southeast1.firebasedatabase.app",
+        storageBucket: "ourlotteday.appspot.com"
     };
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
+    const storage = firebase.storage();
     const dbRef = database.ref('/our-lotte-day');
 
+    let currentTodoId = null;
+    const photoUploadInput = document.getElementById('photo-upload');
 
     // --- Data Persistence ---
     dbRef.on('value', (snapshot) => {
@@ -81,9 +85,12 @@ document.addEventListener('DOMContentLoaded', () => {
             li.className = `list-group-item ${todo.completed ? 'completed' : ''}`;
             li.dataset.id = todo.id;
 
+            const topRow = document.createElement('div');
+            topRow.className = 'todo-top-row';
+
             const handle = document.createElement('span');
             handle.className = 'drag-handle';
-            handle.innerHTML = '&#9776;'; // hamburger icon
+            handle.innerHTML = '&#9776;';
             handle.addEventListener('mousedown', startDrag);
             handle.addEventListener('touchstart', startDrag);
 
@@ -92,18 +99,39 @@ document.addEventListener('DOMContentLoaded', () => {
             textSpan.textContent = todo.text;
             textSpan.addEventListener('click', () => toggleTodo(todo.id));
 
+            const rightContainer = document.createElement('div');
+            rightContainer.className = 'right-container';
+
             const deleteBtn = document.createElement('button');
             deleteBtn.className = 'btn btn-danger btn-sm';
             deleteBtn.textContent = 'X';
             deleteBtn.addEventListener('click', () => deleteTodo(todo.id));
+            
+            if (todo.completed && !todo.imageUrl) {
+                const uploadBtn = document.createElement('button');
+                uploadBtn.className = 'btn btn-sm btn-outline-primary upload-btn';
+                uploadBtn.textContent = '사진 올리기';
+                uploadBtn.onclick = () => {
+                    currentTodoId = todo.id;
+                    photoUploadInput.click();
+                };
+                rightContainer.appendChild(uploadBtn);
+            }
 
-            const rightContainer = document.createElement('div');
-            rightContainer.className = 'right-container';
             rightContainer.appendChild(deleteBtn);
 
-            li.appendChild(handle);
-            li.appendChild(textSpan);
-            li.appendChild(rightContainer);
+            topRow.appendChild(handle);
+            topRow.appendChild(textSpan);
+            topRow.appendChild(rightContainer);
+
+            li.appendChild(topRow);
+
+            if (todo.completed && todo.imageUrl) {
+                const img = document.createElement('img');
+                img.src = todo.imageUrl;
+                img.className = 'todo-image';
+                li.appendChild(img);
+            }
 
             todoList.appendChild(li);
         });
@@ -218,7 +246,32 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const deleteTodo = (id) => {
+        // Also delete photo from storage if it exists
+        const todo = todos.find(t => t.id === id);
+        if (todo && todo.imageUrl) {
+            const photoRef = storage.refFromURL(todo.imageUrl);
+            photoRef.delete().catch(error => {
+                console.error("Error deleting photo: ", error);
+            });
+        }
         database.ref(`/our-lotte-day/todos/${id}`).remove();
+    };
+
+    const uploadPhoto = (file) => {
+        if (!currentTodoId || !file) return;
+        const todoId = currentTodoId;
+        const filePath = `images/${todoId}/${file.name}`;
+        const fileRef = storage.ref(filePath);
+
+        fileRef.put(file).then(snapshot => {
+            snapshot.ref.getDownloadURL().then(downloadURL => {
+                database.ref(`/our-lotte-day/todos/${todoId}/imageUrl`).set(downloadURL);
+                currentTodoId = null;
+            });
+        }).catch(error => {
+            console.error("Error uploading photo: ", error);
+            currentTodoId = null;
+        });
     };
 
     // --- Event Listeners ---
@@ -234,6 +287,11 @@ document.addEventListener('DOMContentLoaded', () => {
         debounceTimeout = setTimeout(() => {
             updateTeamName(teamNameInput.value);
         }, 500);
+    });
+
+    photoUploadInput.addEventListener('change', e => {
+        const file = e.target.files[0];
+        uploadPhoto(file);
     });
 
     // --- Initial Load ---
