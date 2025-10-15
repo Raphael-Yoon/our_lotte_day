@@ -195,3 +195,21 @@ h1, h2 {
     height: 1rem;
     border-width: 0.2em;
 }
+
+/* =============================
+   Milestone Emoji Confetti
+   ============================= */
+.confetti-emoji {
+  position: fixed;
+  top: -5vh;
+  z-index: 9999;
+  animation-name: fall-spin;
+  animation-timing-function: ease-in;
+  pointer-events: none;
+}
+
+@keyframes fall-spin {
+  0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
+}

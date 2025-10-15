@@ -240,9 +240,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         progressBar.style.width = `${percentage}%`;
         progressBar.setAttribute('aria-valuenow', percentage);
 
-        if (percentage === 100 && totalCount > 0) {
-            // You can add a congratulations message here if you want
-        }
+        // --- Milestone Celebration ---
+        maybeCelebrateMilestone(percentage, totalCount);
     };
 
     const addTodo = (text) => {
@@ -427,5 +426,100 @@ document.addEventListener('DOMContentLoaded', async () => {
         renderEmptyList();
         updateProgress();
     });
+
+    // ==========================
+    // Milestone Celebration Utils
+    // ==========================
+    const milestones = [25, 50, 75, 100];
+    let lastCelebratedMilestone = 0;
+
+    function maybeCelebrateMilestone(percentage, totalCount) {
+        if (totalCount === 0) return;
+        const next = milestones.find(m => percentage >= m && lastCelebratedMilestone < m);
+        if (!next) return;
+        lastCelebratedMilestone = next;
+        celebrate(next);
+    }
+
+    function celebrate(level) {
+        tryVibrate(level);
+        spawnEmojiConfetti(level);
+        playChime(level);
+    }
+
+    function tryVibrate(level) {
+        if (!('vibrate' in navigator)) return;
+        const short = [100];
+        const medium = [120, 60, 120];
+        const long = [150, 70, 150, 70, 200];
+        const pattern = level === 25 ? short : level === 50 ? medium : level === 75 ? medium : long;
+        navigator.vibrate(pattern);
+    }
+
+    function spawnEmojiConfetti(level) {
+        const count = level === 100 ? 40 : level === 75 ? 28 : level === 50 ? 22 : 16;
+        const emojis = ['🎉', '✨', '💖', '⭐', '🎈'];
+        const duration = 1500;
+        for (let i = 0; i < count; i++) {
+            const span = document.createElement('span');
+            span.className = 'confetti-emoji';
+            span.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+            const startLeft = Math.random() * 100; // vw
+            const size = 16 + Math.random() * 20; // px
+            const rotate = Math.random() * 360;
+            const delay = Math.random() * 200; // ms
+            span.style.left = startLeft + 'vw';
+            span.style.fontSize = size + 'px';
+            span.style.transform = `rotate(${rotate}deg)`;
+            span.style.animationDuration = (1 + Math.random() * 0.6) + 's';
+            span.style.animationDelay = delay + 'ms';
+            document.body.appendChild(span);
+            setTimeout(() => span.remove(), duration + 600);
+        }
+    }
+
+    function playChime(level) {
+        try {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (!AudioCtx) return;
+            const ctx = new AudioCtx();
+            const now = ctx.currentTime;
+
+            const makeBeep = (time, freq, length = 0.12) => {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.value = freq;
+                gain.gain.setValueAtTime(0, time);
+                gain.gain.linearRampToValueAtTime(0.2, time + 0.01);
+                gain.gain.exponentialRampToValueAtTime(0.0001, time + length);
+                osc.connect(gain).connect(ctx.destination);
+                osc.start(time);
+                osc.stop(time + length + 0.02);
+            };
+
+            if (level === 25) {
+                makeBeep(now, 880);
+            } else if (level === 50) {
+                makeBeep(now, 880);
+                makeBeep(now + 0.15, 988);
+            } else if (level === 75) {
+                makeBeep(now, 880);
+                makeBeep(now + 0.15, 988);
+                makeBeep(now + 0.30, 1175);
+            } else {
+                // 100%
+                makeBeep(now, 880);
+                makeBeep(now + 0.15, 988);
+                makeBeep(now + 0.30, 1175);
+                makeBeep(now + 0.50, 1320);
+            }
+
+            // Auto close context after a short while to free resources
+            setTimeout(() => ctx.close().catch(() => {}), 1200);
+        } catch (e) {
+            // ignore audio errors
+        }
+    }
 
 });
