@@ -80,8 +80,11 @@ h1, h2 {
 
 .list-group-item .todo-text {
     cursor: pointer;
-    flex-grow: 1;
+    flex: 1 1 auto;
+    min-width: 0;
     margin: 0 10px;
+    word-break: break-word;
+    overflow-wrap: anywhere;
 }
 
 .drag-handle {
@@ -96,6 +99,8 @@ h1, h2 {
 .right-container {
     display: flex;
     align-items: center;
+    gap: 6px;
+    flex: 0 0 auto;
 }
 
 .list-group-item input[type="checkbox"] {
@@ -174,8 +179,13 @@ h1, h2 {
 .todo-top-row {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
     width: 100%;
+}
+
+.right-container .btn {
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .todo-image {
