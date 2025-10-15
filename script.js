@@ -158,12 +158,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         draggedItem.classList.add('dragging');
 
         document.addEventListener('mousemove', onDrag);
-        document.addEventListener('touchmove', onDrag, {
-            passive: false
-        });
+        document.addEventListener('touchmove', onDrag, { passive: false });
 
         document.addEventListener('mouseup', endDrag);
-        document.addEventListener('touchend', endDrag);
+        document.addEventListener('touchend', endDrag, { passive: true });
     }
 
     function onDrag(e) {
@@ -442,18 +440,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     function celebrate(level) {
-        tryVibrate(level);
+        // Visual celebration only (no vibration/sound)
         spawnEmojiConfetti(level);
-        playChime(level);
-    }
-
-    function tryVibrate(level) {
-        if (!('vibrate' in navigator)) return;
-        const short = [100];
-        const medium = [120, 60, 120];
-        const long = [150, 70, 150, 70, 200];
-        const pattern = level === 25 ? short : level === 50 ? medium : level === 75 ? medium : long;
-        navigator.vibrate(pattern);
     }
 
     function spawnEmojiConfetti(level) {
@@ -478,48 +466,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    function playChime(level) {
-        try {
-            const AudioCtx = window.AudioContext || window.webkitAudioContext;
-            if (!AudioCtx) return;
-            const ctx = new AudioCtx();
-            const now = ctx.currentTime;
-
-            const makeBeep = (time, freq, length = 0.12) => {
-                const osc = ctx.createOscillator();
-                const gain = ctx.createGain();
-                osc.type = 'sine';
-                osc.frequency.value = freq;
-                gain.gain.setValueAtTime(0, time);
-                gain.gain.linearRampToValueAtTime(0.2, time + 0.01);
-                gain.gain.exponentialRampToValueAtTime(0.0001, time + length);
-                osc.connect(gain).connect(ctx.destination);
-                osc.start(time);
-                osc.stop(time + length + 0.02);
-            };
-
-            if (level === 25) {
-                makeBeep(now, 880);
-            } else if (level === 50) {
-                makeBeep(now, 880);
-                makeBeep(now + 0.15, 988);
-            } else if (level === 75) {
-                makeBeep(now, 880);
-                makeBeep(now + 0.15, 988);
-                makeBeep(now + 0.30, 1175);
-            } else {
-                // 100%
-                makeBeep(now, 880);
-                makeBeep(now + 0.15, 988);
-                makeBeep(now + 0.30, 1175);
-                makeBeep(now + 0.50, 1320);
-            }
-
-            // Auto close context after a short while to free resources
-            setTimeout(() => ctx.close().catch(() => {}), 1200);
-        } catch (e) {
-            // ignore audio errors
-        }
-    }
+    // Removed sound (playChime) and vibration for mobile compatibility
 
 });
